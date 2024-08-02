@@ -12,8 +12,10 @@ body.overflow {
   min-height: 100px;
 }
 .main-martor {
-  margin: 1em 0;
-  position: relative;
+    margin: 1em 0;
+    position: relative;
+    overflow: hidden;
+    width: 100%
 }
 .main-martor .modal-header {
   padding: 10px 1rem;
@@ -87,8 +89,9 @@ body.overflow {
 
 div.martor-preview {
   padding: 1rem;
-  overflow: auto;
+  overflow: scroll;
   background: #fdfdfd;
+  max-height: 50vh
 }
 
 div.martor-preview-stale {
