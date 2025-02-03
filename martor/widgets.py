@@ -7,6 +7,7 @@ from django.template.loader import get_template
 from django.urls import reverse
 
 from .settings import (
+    MARTOR_ALTERNATIVE_CSS_FILE,
     MARTOR_ALTERNATIVE_CSS_FILE_THEME,
     MARTOR_ALTERNATIVE_JQUERY_JS_FILE,
     MARTOR_ALTERNATIVE_JS_FILE_THEME,
@@ -89,7 +90,6 @@ class MartorWidget(forms.Textarea):
             "all": (
                 "plugins/css/ace.min.css",
                 "plugins/css/resizable.min.css",
-                "martor/css/martor.%s.min.css" % selected_theme,
             )
         }
 
@@ -114,8 +114,17 @@ class MartorWidget(forms.Textarea):
         if MARTOR_ENABLE_CONFIGS.get("spellcheck") == "true":
             js = ("plugins/js/typo.js", "plugins/js/spellcheck.js").__add__(js)
 
-        # support alternative vendor theme file like: bootstrap, semantic)
-        # 1. vendor css theme
+        # support alternative base css file like: bootstrap, semantic
+        # 1. base css theme
+        if MARTOR_ALTERNATIVE_CSS_FILE:
+            css_file = MARTOR_ALTERNATIVE_CSS_FILE
+            css["all"] = css.get("all").__add__((css_file,))
+        else:
+            css_file = "martor/css/martor.%s.min.css" % selected_theme
+            css["all"] = css.get("all").__add__((css_file,))
+
+        # support alternative vendor theme file like: bootstrap, semantic
+        # 2. vendor css theme
         if MARTOR_ALTERNATIVE_CSS_FILE_THEME:
             css_theme = MARTOR_ALTERNATIVE_CSS_FILE_THEME
             css["all"] = (css_theme,).__add__(css.get("all"))
@@ -123,7 +132,7 @@ class MartorWidget(forms.Textarea):
             css_theme = "plugins/css/%s.min.css" % selected_theme
             css["all"] = (css_theme,).__add__(css.get("all"))
 
-        # 2. vendor js theme
+        # 3. vendor js theme
         if MARTOR_ALTERNATIVE_JS_FILE_THEME:
             js_theme = MARTOR_ALTERNATIVE_JS_FILE_THEME
             js = (MARTOR_ALTERNATIVE_JS_FILE_THEME,).__add__(js)
@@ -131,7 +140,7 @@ class MartorWidget(forms.Textarea):
             js_theme = "plugins/js/%s.min.js" % selected_theme
             js = (js_theme,).__add__(js)
 
-        # 3. vendor jQUery
+        # 4. vendor jQUery
         if MARTOR_ALTERNATIVE_JQUERY_JS_FILE:
             js = (MARTOR_ALTERNATIVE_JQUERY_JS_FILE,).__add__(js)
         elif MARTOR_ENABLE_CONFIGS.get("jquery") == "true":
