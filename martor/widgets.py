@@ -7,6 +7,7 @@ from django.template.loader import get_template
 from django.urls import reverse
 
 from .settings import (
+    MARTOR_ADDITIONAL_CSS_FILE,
     MARTOR_ALTERNATIVE_CSS_FILE,
     MARTOR_ALTERNATIVE_CSS_FILE_THEME,
     MARTOR_ALTERNATIVE_JQUERY_JS_FILE,
@@ -130,14 +131,20 @@ class MartorWidget(forms.Textarea):
             css_theme = "plugins/css/%s.min.css" % selected_theme
         css["all"] = (css_theme,) + css.get("all")
 
-        # 3. vendor js theme
+        # support additional css files to overwrite or add styles
+        # 3. additional css theme (overwrites)
+        if MARTOR_ADDITIONAL_CSS_FILE:
+            css_file = MARTOR_ADDITIONAL_CSS_FILE
+            css["all"] = css.get("all") + (css_file,)
+
+        # 4. vendor js theme
         if MARTOR_ALTERNATIVE_JS_FILE_THEME:
             js_theme = MARTOR_ALTERNATIVE_JS_FILE_THEME
         else:
             js_theme = "plugins/js/%s.min.js" % selected_theme
         js = (js_theme,) + js
 
-        # 4. vendor jQUery
+        # 5. vendor jQUery
         if MARTOR_ALTERNATIVE_JQUERY_JS_FILE:
             js = (MARTOR_ALTERNATIVE_JQUERY_JS_FILE,) + js
         elif MARTOR_ENABLE_CONFIGS.get("jquery") == "true":

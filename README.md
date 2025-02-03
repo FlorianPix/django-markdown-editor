@@ -166,6 +166,7 @@ MARTOR_MARKDOWN_BASE_MENTION_URL = 'https://python.web.id/author/'              
 MARTOR_ALTERNATIVE_JS_FILE_THEME = "semantic-themed/semantic.min.js"   # default None
 MARTOR_ALTERNATIVE_CSS_FILE = "semantic-themed/semantic-base.css"      # default None
 MARTOR_ALTERNATIVE_CSS_FILE_THEME = "semantic-themed/semantic.min.css" # default None
+MARTOR_ADDITIONAL_CSS_FILE = "additional-fancy-css-file.css"           # default None
 MARTOR_ALTERNATIVE_JQUERY_JS_FILE = "jquery/dist/jquery.min.js"        # default None
 
 # URL schemes that are allowed within links
