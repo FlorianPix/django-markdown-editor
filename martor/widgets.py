@@ -7,6 +7,8 @@ from django.template.loader import get_template
 from django.urls import reverse
 
 from .settings import (
+    MARTOR_ADDITIONAL_CSS_FILE,
+    MARTOR_ALTERNATIVE_CSS_FILE,
     MARTOR_ALTERNATIVE_CSS_FILE_THEME,
     MARTOR_ALTERNATIVE_JQUERY_JS_FILE,
     MARTOR_ALTERNATIVE_JS_FILE_THEME,
@@ -89,13 +91,12 @@ class MartorWidget(forms.Textarea):
             "all": (
                 "plugins/css/ace.min.css",
                 "plugins/css/resizable.min.css",
-                "martor/css/martor.%s.min.css" % selected_theme,
             )
         }
 
         if MARTOR_ENABLE_ADMIN_CSS:
-            admin_theme = ("martor/css/martor-admin.min.css",)
-            css["all"] = admin_theme.__add__(css.get("all"))
+            admin_theme = "martor/css/martor-admin.min.css"
+            css["all"] = (admin_theme,) + css.get("all")
 
         js = (
             "plugins/js/ace.js",
@@ -112,30 +113,42 @@ class MartorWidget(forms.Textarea):
         # of the tuple in case it affects behaviour.
         # spellcheck configuration
         if MARTOR_ENABLE_CONFIGS.get("spellcheck") == "true":
-            js = ("plugins/js/typo.js", "plugins/js/spellcheck.js").__add__(js)
+            js = ("plugins/js/typo.js", "plugins/js/spellcheck.js") + js
 
-        # support alternative vendor theme file like: bootstrap, semantic)
-        # 1. vendor css theme
+        # support alternative base css file like: bootstrap, semantic
+        # 1. base css theme
+        if MARTOR_ALTERNATIVE_CSS_FILE:
+            css_file = MARTOR_ALTERNATIVE_CSS_FILE
+        else:
+            css_file = "martor/css/martor.%s.min.css" % selected_theme
+        css["all"] = css.get("all") + (css_file,)
+
+        # support alternative vendor theme file like: bootstrap, semantic
+        # 2. vendor css theme
         if MARTOR_ALTERNATIVE_CSS_FILE_THEME:
             css_theme = MARTOR_ALTERNATIVE_CSS_FILE_THEME
-            css["all"] = (css_theme,).__add__(css.get("all"))
         else:
             css_theme = "plugins/css/%s.min.css" % selected_theme
-            css["all"] = (css_theme,).__add__(css.get("all"))
+        css["all"] = (css_theme,) + css.get("all")
 
-        # 2. vendor js theme
+        # support additional css files to overwrite or add styles
+        # 3. additional css theme (overwrites)
+        if MARTOR_ADDITIONAL_CSS_FILE:
+            css_file = MARTOR_ADDITIONAL_CSS_FILE
+            css["all"] = css.get("all") + (css_file,)
+
+        # 4. vendor js theme
         if MARTOR_ALTERNATIVE_JS_FILE_THEME:
             js_theme = MARTOR_ALTERNATIVE_JS_FILE_THEME
-            js = (MARTOR_ALTERNATIVE_JS_FILE_THEME,).__add__(js)
         else:
             js_theme = "plugins/js/%s.min.js" % selected_theme
-            js = (js_theme,).__add__(js)
+        js = (js_theme,) + js
 
-        # 3. vendor jQUery
+        # 5. vendor jQUery
         if MARTOR_ALTERNATIVE_JQUERY_JS_FILE:
-            js = (MARTOR_ALTERNATIVE_JQUERY_JS_FILE,).__add__(js)
+            js = (MARTOR_ALTERNATIVE_JQUERY_JS_FILE,) + js
         elif MARTOR_ENABLE_CONFIGS.get("jquery") == "true":
-            js = ("plugins/js/jquery.min.js",).__add__(js)
+            js = ("plugins/js/jquery.min.js",) + js
 
 
 class AdminMartorWidget(MartorWidget, widgets.AdminTextareaWidget):
