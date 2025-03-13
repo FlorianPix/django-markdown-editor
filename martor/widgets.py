@@ -7,23 +7,15 @@ from django.contrib.admin import widgets
 from django.template.loader import get_template
 from django.urls import reverse
 
-from .settings import (
-    MARTOR_ADDITIONAL_CSS_FILE,
-    MARTOR_ALTERNATIVE_CSS_FILE,
-    MARTOR_ALTERNATIVE_CSS_FILE_THEME,
-    MARTOR_USE_DJANGO_JQUERY,
-    MARTOR_ALTERNATIVE_JQUERY_JS_FILE,
-    MARTOR_ALTERNATIVE_JQUERY_INIT_JS_FILE,
-    MARTOR_ALTERNATIVE_JS_FILE_THEME,
-    MARTOR_ENABLE_ADMIN_CSS,
-    MARTOR_ENABLE_CONFIGS,
-    MARTOR_MARKDOWN_BASE_EMOJI_URL,
-    MARTOR_MARKDOWNIFY_TIMEOUT,
-    MARTOR_SEARCH_USERS_URL,
-    MARTOR_THEME,
-    MARTOR_TOOLBAR_BUTTONS,
-    MARTOR_UPLOAD_URL,
-)
+from .settings import (MARTOR_ADDITIONAL_CSS_FILE, MARTOR_ALTERNATIVE_CSS_FILE,
+                       MARTOR_ALTERNATIVE_CSS_FILE_THEME,
+                       MARTOR_ALTERNATIVE_JQUERY_INIT_JS_FILE,
+                       MARTOR_ALTERNATIVE_JQUERY_JS_FILE,
+                       MARTOR_ALTERNATIVE_JS_FILE_THEME, MARTOR_ENABLE_ADMIN_CSS,
+                       MARTOR_ENABLE_CONFIGS, MARTOR_MARKDOWN_BASE_EMOJI_URL,
+                       MARTOR_MARKDOWNIFY_TIMEOUT, MARTOR_SEARCH_USERS_URL,
+                       MARTOR_THEME, MARTOR_TOOLBAR_BUTTONS, MARTOR_UPLOAD_URL,
+                       MARTOR_USE_DJANGO_JQUERY)
 
 
 def get_theme():
@@ -33,42 +25,7 @@ def get_theme():
         return MARTOR_THEME
     return "bootstrap"
 
-
-class JqueryMediaMixin:
-    @property
-    def media(self):
-        """Media defined as a dynamic property instead of an inner class."""
-        media = super(JqueryMediaMixin, self).media
-
-        js = []
-
-        if MARTOR_ALTERNATIVE_JQUERY_JS_FILE:
-            js.append(MARTOR_ALTERNATIVE_JS_FILE_THEME)
-        else:
-            vendor = 'vendor/jquery/'
-            extra = '' if settings.DEBUG else '.min'
-
-            jquery_path = f"{vendor}jquery{extra}.js"
-
-            if MARTOR_USE_DJANGO_JQUERY:
-                jquery_path = f"admin/js/{jquery_path}"
-
-            js.append(jquery_path)
-
-        if MARTOR_ALTERNATIVE_JQUERY_INIT_JS_FILE:
-            js.append(MARTOR_ALTERNATIVE_JQUERY_INIT_JS_FILE)
-        else:
-            jquery_init_path = "jquery.init.js"
-
-            if MARTOR_USE_DJANGO_JQUERY:
-                jquery_init_path = f"admin/js/{jquery_init_path}"
-
-            js.append(jquery_init_path)
-
-        media += forms.Media(js=js)
-        return media
-
-class MartorWidget(JqueryMediaMixin, forms.Textarea):
+class MartorWidget(forms.Textarea):
     def render(self, name, value, attrs=None, renderer=None, **kwargs):
         # Create random string to make field ID unique to prevent duplicated ID
         # when rendering fields with the same field name
@@ -178,12 +135,36 @@ class MartorWidget(JqueryMediaMixin, forms.Textarea):
             css_file = MARTOR_ADDITIONAL_CSS_FILE
             css["all"] = css.get("all") + (css_file,)
 
+        if MARTOR_ALTERNATIVE_JQUERY_JS_FILE:
+            jquery = (MARTOR_ALTERNATIVE_JQUERY_JS_FILE)
+        else:
+            vendor = 'vendor/jquery/'
+            extra = '' if settings.DEBUG else '.min'
+
+            jquery_path = f"{vendor}jquery{extra}.js"
+
+            if MARTOR_USE_DJANGO_JQUERY:
+                jquery_path = f"admin/js/{jquery_path}"
+
+            jquery = jquery_path
+
+        if MARTOR_ALTERNATIVE_JQUERY_INIT_JS_FILE:
+            jquery_init = MARTOR_ALTERNATIVE_JQUERY_INIT_JS_FILE
+        else:
+            jquery_init_path = "jquery.init.js"
+
+            if MARTOR_USE_DJANGO_JQUERY:
+                jquery_init_path = f"admin/js/{jquery_init_path}"
+
+            jquery_init = jquery_init_path
+
         # 4. vendor js theme
         if MARTOR_ALTERNATIVE_JS_FILE_THEME:
             js_theme = MARTOR_ALTERNATIVE_JS_FILE_THEME
         else:
             js_theme = "plugins/js/%s.min.js" % selected_theme
-        js = (js_theme,) + js
+
+        js = (jquery, jquery_init, js_theme) + js
 
         media += forms.Media(css=css, js=js)
         return media
