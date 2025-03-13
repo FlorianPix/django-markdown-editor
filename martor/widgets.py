@@ -33,6 +33,7 @@ def get_theme():
         return MARTOR_THEME
     return "bootstrap"
 
+
 class JqueryMediaMixin:
     @property
     def media(self):
@@ -41,22 +42,28 @@ class JqueryMediaMixin:
 
         js = []
 
-        if MARTOR_ALTERNATIVE_JQUERY_JS_FILE and MARTOR_ALTERNATIVE_JQUERY_INIT_JS_FILE:
-            js.append(MARTOR_ALTERNATIVE_JQUERY_JS_FILE)
-            js.append(MARTOR_ALTERNATIVE_JQUERY_INIT_JS_FILE)
+        if MARTOR_ALTERNATIVE_JQUERY_JS_FILE:
+            js.append(MARTOR_ALTERNATIVE_JS_FILE_THEME)
         else:
-            vendor = "vendor/jquery/"
-            extra = "" if settings.DEBUG else ".min"
+            vendor = 'vendor/jquery/'
+            extra = '' if settings.DEBUG else '.min'
 
-            jquery_paths = [
-                "{}jquery{}.js".format(vendor, extra),
-                "jquery.init.js",
-            ]
+            jquery_path = f"{vendor}jquery{extra}.js"
 
             if MARTOR_USE_DJANGO_JQUERY:
-                jquery_paths = ["admin/js/{}".format(path) for path in jquery_paths]
+                jquery_path = f"admin/js/{jquery_path}"
 
-            js.extend(jquery_paths)
+            js.append(jquery_path)
+
+        if MARTOR_ALTERNATIVE_JQUERY_INIT_JS_FILE:
+            js.append(MARTOR_ALTERNATIVE_JQUERY_INIT_JS_FILE)
+        else:
+            jquery_init_path = "jquery.init.js"
+
+            if MARTOR_USE_DJANGO_JQUERY:
+                jquery_init_path = f"admin/js/{jquery_init_path}"
+
+            js.append(jquery_init_path)
 
         media += forms.Media(js=js)
         return media
