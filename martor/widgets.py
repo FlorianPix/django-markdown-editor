@@ -164,7 +164,7 @@ class MartorWidget(forms.Textarea):
         else:
             js_theme = "plugins/js/%s.min.js" % selected_theme
 
-        js = (jquery, jquery_init, js_theme) + js
+        js = (jquery, jquery_init, js_theme,) + js
 
         media += forms.Media(css=css, js=js)
         return media
