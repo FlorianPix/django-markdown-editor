@@ -2,6 +2,7 @@ import random
 import string
 
 from django import forms
+from django.conf import settings
 from django.contrib.admin import widgets
 from django.template.loader import get_template
 from django.urls import reverse
@@ -10,7 +11,9 @@ from .settings import (
     MARTOR_ADDITIONAL_CSS_FILE,
     MARTOR_ALTERNATIVE_CSS_FILE,
     MARTOR_ALTERNATIVE_CSS_FILE_THEME,
+    MARTOR_USE_DJANGO_JQUERY,
     MARTOR_ALTERNATIVE_JQUERY_JS_FILE,
+    MARTOR_ALTERNATIVE_JQUERY_INIT_JS_FILE,
     MARTOR_ALTERNATIVE_JS_FILE_THEME,
     MARTOR_ENABLE_ADMIN_CSS,
     MARTOR_ENABLE_CONFIGS,
@@ -30,8 +33,35 @@ def get_theme():
         return MARTOR_THEME
     return "bootstrap"
 
+class JqueryMediaMixin:
+    @property
+    def media(self):
+        """Media defined as a dynamic property instead of an inner class."""
+        media = super(JqueryMediaMixin, self).media
 
-class MartorWidget(forms.Textarea):
+        js = []
+
+        if MARTOR_ALTERNATIVE_JQUERY_JS_FILE and MARTOR_ALTERNATIVE_JQUERY_INIT_JS_FILE:
+            js.append(MARTOR_ALTERNATIVE_JQUERY_JS_FILE)
+            js.append(MARTOR_ALTERNATIVE_JQUERY_INIT_JS_FILE)
+        else:
+            vendor = "vendor/jquery/"
+            extra = "" if settings.DEBUG else ".min"
+
+            jquery_paths = [
+                "{}jquery{}.js".format(vendor, extra),
+                "jquery.init.js",
+            ]
+
+            if MARTOR_USE_DJANGO_JQUERY:
+                jquery_paths = ["admin/js/{}".format(path) for path in jquery_paths]
+
+            js.extend(jquery_paths)
+
+        media += forms.Media(js=js)
+        return media
+
+class MartorWidget(JqueryMediaMixin, forms.Textarea):
     def render(self, name, value, attrs=None, renderer=None, **kwargs):
         # Create random string to make field ID unique to prevent duplicated ID
         # when rendering fields with the same field name
@@ -85,7 +115,11 @@ class MartorWidget(forms.Textarea):
             }
         )
 
-    class Media:
+    @property
+    def media(self):
+        """Media defined as a dynamic property instead of an inner class."""
+        media = super(MartorWidget, self).media
+
         selected_theme = get_theme()
         css = {
             "all": (
@@ -144,11 +178,8 @@ class MartorWidget(forms.Textarea):
             js_theme = "plugins/js/%s.min.js" % selected_theme
         js = (js_theme,) + js
 
-        # 5. vendor jQUery
-        if MARTOR_ALTERNATIVE_JQUERY_JS_FILE:
-            js = (MARTOR_ALTERNATIVE_JQUERY_JS_FILE,) + js
-        elif MARTOR_ENABLE_CONFIGS.get("jquery") == "true":
-            js = ("plugins/js/jquery.min.js",) + js
+        media += forms.Media(css=css, js=js)
+        return media
 
 
 class AdminMartorWidget(MartorWidget, widgets.AdminTextareaWidget):

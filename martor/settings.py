@@ -131,6 +131,12 @@ MARTOR_ADDITIONAL_CSS_FILE = getattr(
 MARTOR_ALTERNATIVE_JQUERY_JS_FILE = getattr(
     settings, "MARTOR_ALTERNATIVE_JQUERY_JS_FILE", None
 )
+MARTOR_ALTERNATIVE_JQUERY_INIT_JS_FILE = getattr(
+    settings, "MARTOR_ALTERNATIVE_JQUERY_INIT_JS_FILE", None
+)
+MARTOR_USE_DJANGO_JQUERY = getattr(
+    settings, "MARTOR_USE_DJANGO_JQUERY", False
+)
 
 # URL schemes that are allowed within links
 ALLOWED_URL_SCHEMES = getattr(
