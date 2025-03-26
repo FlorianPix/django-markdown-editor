@@ -874,12 +874,14 @@
                 var row = $(event.target);
                 row.find('.main-martor').each(function () {
                     var id = row.attr('id');
-                    id = id.substr(id.lastIndexOf('-') + 1);
-                    // Notice here we are using our jQuery instead of Django's.
-                    // This is because plugins are only loaded for ours.
-                    var fixed = $(this.outerHTML.replace(/__prefix__/g, id));
-                    $(this).replaceWith(fixed);
-                    fixed.martor();
+                    if (id !== undefined) {
+                        id = id.substring(id.lastIndexOf('-') + 1);
+                        // Notice here we are using our jQuery instead of Django's.
+                        // This is because plugins are only loaded for ours.
+                        var fixed = $(this.outerHTML.replace(/__prefix__/g, id));
+                        $(this).replaceWith(fixed);
+                        fixed.martor();
+                    }
                 });
             }, 1000);
         });
